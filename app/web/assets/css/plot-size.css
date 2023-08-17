@@ -1,0 +1,21 @@
+.plot-canvas {
+    width: 80%;
+}
+
+@media screen and (min-width: 576px) {
+    .plot-canvas {
+        width: 90%;
+    }
+}
+
+@media screen and (min-width: 992px) {
+    .plot-canvas {
+        width: 400px;
+    }
+}
+
+@media screen and (min-width: 1600px) {
+    .plot-canvas {
+        width: 500px;
+    }
+}

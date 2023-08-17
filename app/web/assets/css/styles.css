@@ -1,0 +1,17 @@
+.input-fields-text {
+    padding-top: 3px;
+}
+
+.row-separator-top {
+    height: 10px;
+}
+
+.input-fields-numbers {
+    width: 100%;
+    text-align: end;
+}
+
+.button-redraw-plot {
+    width: 100%;
+    padding: 3px 0 3px 0;
+}
