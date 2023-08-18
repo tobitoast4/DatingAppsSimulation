@@ -15,7 +15,7 @@ average_amount_of_matches_female = 0
 simulations = []
 for i in range(AMOUNT_SIMULATIONS):
     print(i)
-    sim = Simulation()
+    sim = Simulation(500, 500, 100, 100)
     sim.run_sim()
     simulations.append(sim)
 
@@ -48,5 +48,5 @@ groups_women = groups_women.rename(columns={'average_amount': 'average_amount_wo
 df = pd.concat([groups_men, groups_women["average_amount_women"]], axis=1, join="inner")
 
 print(df)
-fig = px.bar(df, x="group_name", y=["average_amount_men", "average_amount_women"], barmode='group', title='x')
-fig.show()
+# fig = px.bar(df, x="group_name", y=["average_amount_men", "average_amount_women"], barmode='group', title='x')
+# fig.show()
