@@ -2,6 +2,7 @@ import math
 from threading import Thread
 from werkzeug.exceptions import HTTPException, InternalServerError
 
+from flask import render_template
 import dash
 from dash import Dash, dcc, html, Input, Output, State, MATCH, ALL, callback, clientside_callback
 import dash_bootstrap_components as dbc
@@ -17,8 +18,9 @@ from app.webapp import utils as web_utils
 
 simulations = {}
 
+
 # Use dbc.icons.BOOTSTRAP or dbc.icons.FONT_AWESOME for icons (see https://stackoverflow.com/a/76015777/14522363)
-app = Dash(__name__, external_stylesheets=[dbc.icons.FONT_AWESOME, dbc.themes.SLATE])
+app = Dash(__name__, external_stylesheets=[dbc.icons.BOOTSTRAP, dbc.icons.FONT_AWESOME, dbc.themes.SLATE])
 app.title = "Dating Apps Simulation"
 app._favicon = "favicon.svg"
 app.layout = html.Div(children=[
@@ -31,18 +33,24 @@ app.layout = html.Div(children=[
         dcc.Interval(id="progress_interval", n_intervals=0, interval=500),
     ], className="main-page-padding", id="page"),
     html.Div(id="notify-holder", className="notify-container"),
-    html.Div(id={"type": "error_div", "index": "run_simulation_errors"}, children=None, style={"display": "none"}),
+    html.Div(id={"type": "error_div", "index": "start_simulation_errors"}, children="", style={"display": "none"}),
+    html.Div(id={"type": "error_div", "index": "run_simulation_errors"}, children="", style={"display": "none"}),
 ])
+
+
+@app.server.route('/plotting')
+def plotting():
+    return render_template("html/function_plot.html")
 
 
 clientside_callback(
     """
     function(children) {
-        arr = children[0];
-        if (arr.length > 1) {
-            console.log(arr[0]);
-            console.log(arr[1]);
-            showNotify("error", arr[0], arr[1], 20);
+        for (let i = 0; i < children.length; i++) {
+            arr = children[i];
+            if (arr.length > 1) {
+                showNotify("error", arr[0], arr[1], 20);
+            }
         }
         return "";
     }
@@ -52,10 +60,18 @@ clientside_callback(
     prevent_initial_call=True
 )
 
-clientside_callback(
+clientside_callback(  # TODO: move setUpInfoIcons(); to somewhere else
     """
     function(n_clicks, value) {
-        return draw("canvas_m", value, 1);
+        setUpInfoIcons();
+        
+        try {
+            draw("canvas_m", value, 1);
+        }
+        catch(err) {
+            showNotify("error", "Error while plotting", err.message, 20);
+        }
+        return "";
     }
     """,
     Output("empty-div-1", "children"),
@@ -66,7 +82,13 @@ clientside_callback(
 clientside_callback(
     """
     function(n_clicks, value) {
-        return draw("canvas_f", value, 2);
+        try {
+            draw("canvas_f", value, 2);
+        }
+        catch(err) {
+            showNotify("error", "Error while plotting", err.message, 20);
+        }
+        return "";
     }
     """,
     Output("empty-div-2", "children"),
@@ -76,25 +98,30 @@ clientside_callback(
 
 
 @callback(
-    # Output("run_simulation", "disabled"),
     Output("current_simulation_id", "children"),
-    Output({"type": "error_div", "index": "run_simulation_errors"}, "children"),
+    Output({"type": "error_div", "index": "start_simulation_errors"}, "children"),
     Input("run_simulation", "n_clicks"),
     State("input_amount_of_men", "value"),
     State("input_amount_of_women", "value"),
     State("input_amount_of_women_a_man_will_see", "value"),
     State("input_amount_of_men_a_woman_will_see", "value"),
-    # State("input_max_amount_of_likes_for_men", "value"),
-    # State("input_max_amount_of_likes_for_women", "value"),
-    # State("input_attractivity_function_for_men", "value"),
-    # State("input_attractivity_function_for_women", "value"),
+    State("input_max_amount_of_likes_for_men", "value"),
+    State("input_max_amount_of_likes_for_women", "value"),
+    State("input_attractivity_function_for_men", "value"),
+    State("input_attractivity_function_for_women", "value"),
     prevent_initial_call=True
 )
-def button_click_run_simulation(n_clicks, amount_of_men, amount_of_women, amount_of_women_a_man_will_see, amount_of_men_a_woman_will_see):
+def button_click_run_simulation(n_clicks, amount_of_men, amount_of_women, amount_of_women_a_man_will_see, amount_of_men_a_woman_will_see,
+                                max_amount_of_likes_for_men, max_amount_of_likes_for_women, attractivity_function_for_men,
+                                attractivity_function_for_women):
     try:
-        errors = web_utils.check_inputs_for_errors(amount_of_men, amount_of_women, amount_of_women_a_man_will_see, amount_of_men_a_woman_will_see)
+        errors = web_utils.check_inputs_for_errors(amount_of_men, amount_of_women, amount_of_women_a_man_will_see,
+            amount_of_men_a_woman_will_see, max_amount_of_likes_for_men, max_amount_of_likes_for_women)
+        attractivity_function_for_men = sim_utils.parse_equation(attractivity_function_for_men)
+        attractivity_function_for_women = sim_utils.parse_equation(attractivity_function_for_women)
         if len(errors) <= 0:
-            new_simulation = simulation.Simulation(amount_of_men, amount_of_women, amount_of_women_a_man_will_see, amount_of_men_a_woman_will_see)
+            new_simulation = simulation.Simulation(amount_of_men, amount_of_women, amount_of_women_a_man_will_see, amount_of_men_a_woman_will_see,
+                max_amount_of_likes_for_men, max_amount_of_likes_for_women, attractivity_function_for_men, attractivity_function_for_women)
             thread = Thread(target=new_simulation.run_sim, args=(1,))
             thread.start()
             simulation_id = str(uuid.uuid4())
@@ -112,19 +139,24 @@ def button_click_run_simulation(n_clicks, amount_of_men, amount_of_women, amount
     Output("simulation_progress_status_text", "children"),
     Output("simulation_progress_bar", "className"),
     Output("run_simulation", "children"),
+    Output({"type": "error_div", "index": "run_simulation_errors"}, "children"),
     Input("progress_interval", "n_intervals"),
     State("current_simulation_id", "children")
 )
 def update_progress(n, current_simulation_id):
     if current_simulation_id is not None:
         current_simulation = simulations[current_simulation_id]
+        if current_simulation.latest_error is not None:
+            error = current_simulation.latest_error
+            current_simulation.latest_error = None
+            return 0, "", "", "", "Run Simulation", ["Error in simulation", error]
         progress = current_simulation.progress.current_progress_in_percent()
         progress_text = current_simulation.progress.current_progress_status_text
         if progress >= 100:
-            return progress, f"{progress} %" if progress >= 5 else "", progress_text, "hidden", "Rerun Simulation"
+            return progress, f"{progress} %" if progress >= 5 else "", progress_text, "hidden", "Rerun Simulation", ""
         # only add text after 5% progress to ensure text isn't squashed too much
-        return progress, f"{progress} %" if progress >= 5 else "", progress_text, "", "Rerun Simulation"
-    return 0, "", "", "", "Run Simulation"
+        return progress, f"{progress} %" if progress >= 5 else "", progress_text, "", "Rerun Simulation", ""
+    return 0, "", "", "", "Run Simulation", ""
 
 
 @callback(
@@ -162,4 +194,4 @@ def adjust_granularity(granularity, index, current_simulation_id):
 
 
 def run_server():
-    app.run(debug=True)
+    app.run_server(port=8040, debug=False, threaded=True)

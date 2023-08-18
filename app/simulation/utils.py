@@ -28,3 +28,21 @@ def get_users_in_groups(list_of_users, dict_key, granularity):
             "average_amount": current_group_amount_total / (max_index - min_index),
         })
     return groups
+
+
+def parse_equation(equation):
+    equation = equation.replace("^", "**")
+    equation = equation.replace("sin", "math.sin")
+    equation = equation.replace("cos", "math.cos")
+    equation = equation.replace("tan", "math.tan")
+    equation = equation.replace("asin", "math.asin")
+    equation = equation.replace("acos", "math.acos")
+    equation = equation.replace("atan", "math.atan")
+    equation = equation.replace("sqrt", "math.sqrt")
+    equation = equation.replace("PI", "math.pi")   # allow
+    equation = equation.replace("Pi", "math.pi")   # all
+    equation = equation.replace("pi", "math.pi")   # three
+    equation = equation.replace("e", "math.e")
+    equation = equation.replace("log2", "math.log2")
+    equation = equation.replace("abs", "math.fabs")
+    return equation

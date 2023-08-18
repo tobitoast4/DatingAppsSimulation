@@ -7,6 +7,7 @@ var padding_top_right = 50;
 var canvas_w_h;
 
 function draw(canvas_id, func, sex) {
+    func = parseEquation(func);
     var canvas = document.getElementById(canvas_id);
     if (null == canvas || !canvas.getContext) return;
 
@@ -74,4 +75,22 @@ function showAxes(ctx, axes) {
     ctx.font = "18px Arial";
     ctx.fillStyle = "white";
     ctx.fillText("100 %", canvas_w_h - padding_top_right - 20, canvas_w_h - padding_bottom_left + 30);
+}
+
+function parseEquation(equation) {
+    equation = equation.replace("^", "**");
+    equation = equation.replace("sin", "Math.sin");
+    equation = equation.replace("cos", "Math.cos");
+    equation = equation.replace("tan", "Math.tan");
+    equation = equation.replace("asin", "Math.asin");
+    equation = equation.replace("acos", "Math.acos");
+    equation = equation.replace("atan", "Math.atan");
+    equation = equation.replace("sqrt", "Math.sqrt");
+    equation = equation.replace("PI", "Math.PI");   // allow
+    equation = equation.replace("Pi", "Math.PI");   // all
+    equation = equation.replace("pi", "Math.PI");   // three
+    equation = equation.replace("e", "Math.E");
+    equation = equation.replace("log2", "Math.log2");
+    equation = equation.replace("abs", "Math.abs");
+    return equation;
 }

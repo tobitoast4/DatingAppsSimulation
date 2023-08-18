@@ -11,7 +11,7 @@ def get_page():
     return html.Div([
         html.Br(),
         html.Div([
-            html.H1("Dating Apps Simulation "),
+            html.H3("Dating Apps Simulation "),
             # html.P(html.I(className="bi bi-arrow-through-heart", style={"font-size": "35px", "color": "red"}))
         ], className="d-flex justify-content-center"),
         html.Hr(),
@@ -80,8 +80,7 @@ def get_page():
                             html.Div("Maximum amount of likes for men:", className="input-fields-text")
                         ], className="col-9"),
                         html.Div([
-                            dcc.Input(id="input_max_amount_of_likes_for_men", type="number",
-                                      min=0, max=utils.MAX_AMOUNT_OF_USERS_PER_SEX, className="input-fields-numbers"),
+                            dcc.Input(id="input_max_amount_of_likes_for_men", type="number", className="input-fields-numbers"),
                         ], className="col-3")
                     ]),
                 ], className="col-md-6"),
@@ -92,8 +91,7 @@ def get_page():
                             html.Div("Maximum amount of likes for women:", className="input-fields-text")
                         ], className="col-9"),
                         html.Div([
-                            dcc.Input(id="input_max_amount_of_likes_for_women", type="number",
-                                      min=0, max=utils.MAX_AMOUNT_OF_USERS_PER_SEX, className="input-fields-numbers"),
+                            dcc.Input(id="input_max_amount_of_likes_for_women", type="number", className="input-fields-numbers"),
                         ], className="col-3")
                     ]),
                 ], className="col-md-6")
@@ -102,13 +100,19 @@ def get_page():
                 html.Div([
                     html.Div(className="row-separator-top"),
                     dbc.Row([
-                        html.Div("Formula to determine attractivity for men:", className="input-fields-text")
+                        html.Div([
+                            html.Div("Formula to determine attractivity for men:", className="input-fields-text"),
+                            html.I(className="bi bi-info-circle-fill formula-info-icon")
+                        ], className="d-flex justify-content-start"),
                     ]),
                 ], className="col-md-6"),
                 html.Div([
                     html.Div(className="row-separator-top"),
                     dbc.Row([
-                        html.Div("Formula to determine attractivity for women:", className="input-fields-text")
+                        html.Div([
+                            html.Div("Formula to determine attractivity for women:", className="input-fields-text"),
+                            html.I(className="bi bi-info-circle-fill formula-info-icon")
+                        ], className="d-flex justify-content-start"),
                     ]),
                 ], className="col-md-6")
             ]),
@@ -118,7 +122,7 @@ def get_page():
                     dbc.Row([
                         html.Div([
                             dcc.Input(id="input_attractivity_function_for_men",
-                                      value="Math.pow(x, 6.14)", className="input-fields-numbers"),
+                                      value="x^6.14", className="input-fields-numbers"),
                         ], className="col-8"),
                         html.Div([
                             dbc.Button("Redraw plot", id="btn_draw_plot_men", className="button-redraw-plot"),
@@ -130,7 +134,7 @@ def get_page():
                     dbc.Row([
                         html.Div([
                             dcc.Input(id="input_attractivity_function_for_women",
-                                      value="Math.pow(x, 1.17)", className="input-fields-numbers"),
+                                      value="x^1.17", className="input-fields-numbers"),
                         ], className="col-8"),
                         html.Div([
                             dbc.Button("Redraw plot", id="btn_draw_plot_women", className="button-redraw-plot"),
@@ -182,7 +186,7 @@ def get_table(sim):
     return dbc.Table(table_header + table_body, bordered=True)
 
 
-def get_graph(index, title):
+def get_graph(index, title, highest_granularity):
     return html.Div([
         html.Br(),
         html.H6(title),
@@ -199,7 +203,8 @@ def get_graph(index, title):
             ], className="col-2"),
             html.Div([
                 html.Div(style={"height": "7px"}),
-                dcc.Slider(min=1, max=20, value=10, step=1, marks=None, tooltip={"placement": "bottom"},
+                dcc.Slider(min=1, max=min(100, highest_granularity), value=min(10, highest_granularity), step=1,
+                           marks=None, tooltip={"placement": "bottom"},
                            id={"type": "granularity_slider", "index": index})
             ], className="col-9"),
             html.Div([
@@ -218,14 +223,15 @@ def get_layout_for_figures():
 
 
 def get_results_div(sim):
+    highest_granularity = min(sim.amount_men, sim.amount_women)
     return html.Div([
         html.Br(),
         html.Br(),
         html.H2("Results"),
         get_table(sim),
         dbc.Row([
-            get_graph(DICT_KEY_AMOUNT_LIKES_RECEIVED, "Distribution of amount likes received"),
-            get_graph(DICT_KEY_AMOUNT_MATCHES, "Distribution of amount matches"),
+            get_graph(DICT_KEY_AMOUNT_LIKES_RECEIVED, "Distribution of amount likes received", highest_granularity),
+            get_graph(DICT_KEY_AMOUNT_MATCHES, "Distribution of amount matches", highest_granularity),
         ]),
         html.Br(),
     ])

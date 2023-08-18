@@ -1,3 +1,4 @@
+import sys
 import random
 import time
 from app.simulation.person import *
@@ -9,16 +10,34 @@ def like_current_profile_random(probability_rate):
 
 
 class Simulation:
-    def __init__(self, amount_men, amount_women, amount_men_seen_by_one_woman, amount_women_seen_by_one_man):
+    def __init__(self, amount_men, amount_women, amount_women_seen_by_one_man, amount_men_seen_by_one_woman,
+                 max_amount_of_likes_of_one_man, max_amount_of_likes_of_one_woman, formula_for_men_attractivity,
+                 formula_for_women_attractivity):
+        """Creates a new instance of Simulation.
+
+        :param amount_men:
+        :param amount_women:
+        :param amount_women_seen_by_one_man:
+        :param amount_men_seen_by_one_woman:
+        :param max_amount_of_likes_of_one_man:
+        :param max_amount_of_likes_of_one_woman:
+        :param formula_for_men_attractivity: Should be parsed already.
+        :param formula_for_women_attractivity: Should be parsed already.
+        """
         self.amount_men = amount_men
         self.amount_women = amount_women
-        self.amount_men_seen_by_one_woman = amount_men_seen_by_one_woman
         self.amount_women_seen_by_one_man = amount_women_seen_by_one_man
+        self.amount_men_seen_by_one_woman = amount_men_seen_by_one_woman
+        self.max_amount_of_likes_of_one_man = max_amount_of_likes_of_one_man
+        self.max_amount_of_likes_of_one_woman = max_amount_of_likes_of_one_woman
+        self.formula_for_men_attractivity = formula_for_men_attractivity
+        self.formula_for_women_attractivity = formula_for_women_attractivity
         # progress_to_reach is set to (AMOUNT_MEN + AMOUNT_WOMEN) * 3 as all users will be iterated 3 times:
         # once for creating, once every user will swipe and once for calculating the matches
         self.progress = Progress((self.amount_men + self.amount_women) * 3)
         self.list_of_men = []
         self.list_of_women = []
+        self.latest_error = None
 
     def get_random_sample_of_users_by_sex(self, sex):
         if sex == SEX_MALE:
@@ -79,36 +98,42 @@ class Simulation:
         """
         :param time_sleep: Can be used to show the progress bar for a short amount of time.
         """
-        self.progress.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_1
-        time.sleep(time_sleep)
-        step_size = 1/self.amount_men
-        for i in range(self.amount_men):
-            attractivity = ((step_size * (i+1)) ** 6.14) * 100
-            # print(f"A: {attractivity}")
-            # print(f"B: ", end="")
-            # print(eval(f"(({step_size} * (i+1)) ** 6.14) * 100"))
-            # print()
-            attractivity = 25
-            self.list_of_men.append(User(SEX_MALE, attractivity))
-            self.progress.increase_progress()
+        try:
+            self.progress.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_1
+            time.sleep(time_sleep)
+            step_size = 1/self.amount_men
+            for i in range(self.amount_men):
+                current_x = f"({step_size} * (i+1))"
+                formula = self.formula_for_men_attractivity.replace("x", current_x)
+                attractivity = float(eval(formula))
+                self.list_of_men.append(User(SEX_MALE, attractivity, self.max_amount_of_likes_of_one_man))
+                self.progress.increase_progress()
 
-        step_size = 1/self.amount_women
-        for i in range(self.amount_women):
-            attractivity = ((step_size * (i+1)) ** 1.17) * 100
-            attractivity = 25
-            self.list_of_women.append(User(SEX_FEMALE, attractivity))
-            self.progress.increase_progress()
+            step_size = 1/self.amount_women
+            for i in range(self.amount_women):
+                current_x = f"({step_size} * (i+1))"
+                formula = self.formula_for_women_attractivity.replace("x", current_x)
+                attractivity = float(eval(formula))
+                self.list_of_women.append(User(SEX_FEMALE, attractivity, self.max_amount_of_likes_of_one_woman))
+                self.progress.increase_progress()
 
-        self.progress.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_2
-        self.run_like_process_for_sex(SEX_MALE)
-        self.progress.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_3
-        self.run_like_process_for_sex(SEX_FEMALE)
+            self.progress.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_2
+            self.run_like_process_for_sex(SEX_MALE)
+            self.progress.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_3
+            self.run_like_process_for_sex(SEX_FEMALE)
 
-        self.progress.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_4
-        for user in self.list_of_men + self.list_of_women:
-            user.calculate_amount_of_matches()
-            self.progress.increase_progress()
-        self.progress.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_5
+            self.progress.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_4
+            for user in self.list_of_men + self.list_of_women:
+                user.calculate_amount_of_matches()
+                self.progress.increase_progress()
+            self.progress.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_5
+        except SyntaxError:
+            self.latest_error = f"{sys.exc_info()[1].args[0]} in <br><br>" \
+                                f"{sys.exc_info()[1].args[1][3]} <br><br> " \
+                                f"This character might cause the error: " \
+                                f"{sys.exc_info()[1].args[1][3][(sys.exc_info()[1].args[1][2])-1]}"
+        except Exception as e:
+            self.latest_error = str(e)
 
 
 PROGRESS_STATE_TEXT_STATUS_0 = "Simulation not started"
