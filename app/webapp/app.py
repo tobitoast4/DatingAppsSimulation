@@ -4,8 +4,6 @@ from threading import Thread
 import dash
 from dash import Dash, dcc, html, Input, Output, State, callback, clientside_callback
 import dash_bootstrap_components as dbc
-import plotly.express as px
-import pandas as pd
 import uuid
 
 from app.webapp import page
@@ -13,7 +11,8 @@ from app.simulation import simulation
 
 simulations = {}
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.SLATE])
+# Use dbc.icons.BOOTSTRAP or dbc.icons.FONT_AWESOME for icons (see https://stackoverflow.com/a/76015777/14522363)
+app = Dash(__name__, external_stylesheets=[dbc.icons.FONT_AWESOME, dbc.themes.SLATE])
 app.layout = html.Div(children=[
     html.Div([
         page.get_page(),
@@ -107,20 +106,20 @@ def show_results(simulation_progress_status_text, current_simulation_id, current
     return dash.no_update
 
 
-@callback(
-    Output("granularity_text_for_fig1", "children"),
-    Input("granularity_slider_for_fig1", "value")
-)
-def adjust_granularity(value):
-    return value
-
-
-@callback(
-    Output("granularity_text_for_fig2", "children"),
-    Input("granularity_slider_for_fig2", "value")
-)
-def adjust_granularity(value):
-    return value
+# @callback(
+#     Output("granularity_text_for_fig1", "children"),
+#     Input("granularity_slider_for_fig1", "value")
+# )
+# def adjust_granularity(value):
+#     return value
+#
+#
+# @callback(
+#     Output("granularity_text_for_fig2", "children"),
+#     Input("granularity_slider_for_fig2", "value")
+# )
+# def adjust_granularity(value):
+#     return value
 
 
 def run_server():

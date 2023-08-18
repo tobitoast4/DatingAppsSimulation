@@ -16,6 +16,8 @@ def get_page():
         html.Br(),
         html.Div([
             html.H1("Dating Apps Simulation"),
+            html.Div(className="far fa-circle-check"),
+            html.P(html.I(className="far fa-circle-check", style={"font-size": "30px", "color": "red", "height": "20px", "width": "20px"}))
         ], className="d-flex justify-content-center"),
         html.Hr(),
         html.Div([
@@ -149,7 +151,7 @@ def get_page():
             dbc.Button("Run Simulation", id="run_simulation", style={"width": "100%"}),
             html.Div(style={"height": "10px"}),
             dbc.Progress(value=0, id="simulation_progress_bar", animated=True, striped=True),
-            html.Div(id="simulation_progress_status_text")
+            html.Div(id="simulation_progress_status_text"),
         ]),
         html.Br(),
 
