@@ -1,28 +1,56 @@
 import math
 from threading import Thread
+from werkzeug.exceptions import HTTPException, InternalServerError
 
 import dash
-from dash import Dash, dcc, html, Input, Output, State, callback, clientside_callback
+from dash import Dash, dcc, html, Input, Output, State, MATCH, ALL, callback, clientside_callback
 import dash_bootstrap_components as dbc
+import plotly.graph_objects as go
+import plotly.express as px
 import uuid
 
 from app.webapp import page
+from app.webapp import utils
 from app.simulation import simulation
+from app.simulation import utils as sim_utils
+from app.webapp import utils as web_utils
 
 simulations = {}
 
 # Use dbc.icons.BOOTSTRAP or dbc.icons.FONT_AWESOME for icons (see https://stackoverflow.com/a/76015777/14522363)
 app = Dash(__name__, external_stylesheets=[dbc.icons.FONT_AWESOME, dbc.themes.SLATE])
+app.title = "Dating Apps Simulation"
+app._favicon = "favicon.svg"
 app.layout = html.Div(children=[
     html.Div([
         page.get_page(),
         html.Div(id="empty-div-1"),
         html.Div(id="empty-div-2"),
-        html.Div(id="current_simulation_id", children=None, style={"display": "none"}),
+        html.Div(id="current_simulation_id", children=None, style={"display": "block"}),
         html.Div(id="current_simulation_id_results", children=None, style={"display": "none"}),
         dcc.Interval(id="progress_interval", n_intervals=0, interval=500),
-    ], className="main-page-padding")
+    ], className="main-page-padding", id="page"),
+    html.Div(id="notify-holder", className="notify-container"),
+    html.Div(id={"type": "error_div", "index": "run_simulation_errors"}, children=None, style={"display": "none"}),
 ])
+
+
+clientside_callback(
+    """
+    function(children) {
+        arr = children[0];
+        if (arr.length > 1) {
+            console.log(arr[0]);
+            console.log(arr[1]);
+            showNotify("error", arr[0], arr[1], 20);
+        }
+        return "";
+    }
+    """,
+    Output({"type": "error_div", "index": ALL}, "style"),
+    Input({"type": "error_div", "index": ALL}, "children"),
+    prevent_initial_call=True
+)
 
 clientside_callback(
     """
@@ -50,6 +78,7 @@ clientside_callback(
 @callback(
     # Output("run_simulation", "disabled"),
     Output("current_simulation_id", "children"),
+    Output({"type": "error_div", "index": "run_simulation_errors"}, "children"),
     Input("run_simulation", "n_clicks"),
     State("input_amount_of_men", "value"),
     State("input_amount_of_women", "value"),
@@ -62,12 +91,19 @@ clientside_callback(
     prevent_initial_call=True
 )
 def button_click_run_simulation(n_clicks, amount_of_men, amount_of_women, amount_of_women_a_man_will_see, amount_of_men_a_woman_will_see):
-    new_simulation = simulation.Simulation(amount_of_men, amount_of_women, amount_of_women_a_man_will_see, amount_of_men_a_woman_will_see)
-    thread = Thread(target=new_simulation.run_sim, args=(1,))
-    thread.start()
-    simulation_id = str(uuid.uuid4())
-    simulations.update({simulation_id: new_simulation})
-    return simulation_id
+    try:
+        errors = web_utils.check_inputs_for_errors(amount_of_men, amount_of_women, amount_of_women_a_man_will_see, amount_of_men_a_woman_will_see)
+        if len(errors) <= 0:
+            new_simulation = simulation.Simulation(amount_of_men, amount_of_women, amount_of_women_a_man_will_see, amount_of_men_a_woman_will_see)
+            thread = Thread(target=new_simulation.run_sim, args=(1,))
+            thread.start()
+            simulation_id = str(uuid.uuid4())
+            simulations.update({simulation_id: new_simulation})
+            return simulation_id, ""
+        return None, ["Some inputs are not valid", errors]
+    except Exception as e:
+        return None, ["An exception occurred", str(e)]
+
 
 
 @callback(
@@ -106,20 +142,23 @@ def show_results(simulation_progress_status_text, current_simulation_id, current
     return dash.no_update
 
 
-# @callback(
-#     Output("granularity_text_for_fig1", "children"),
-#     Input("granularity_slider_for_fig1", "value")
-# )
-# def adjust_granularity(value):
-#     return value
-#
-#
-# @callback(
-#     Output("granularity_text_for_fig2", "children"),
-#     Input("granularity_slider_for_fig2", "value")
-# )
-# def adjust_granularity(value):
-#     return value
+@callback(
+    Output({"type": "granularity_text", "index": MATCH}, "children"),
+    Output({"type": "distribution_graph", "index": MATCH}, "figure"),
+    Input({"type": "granularity_slider", "index": MATCH}, "value"),
+    State({"type": "figure_index", "index": MATCH}, "children"),
+    State("current_simulation_id", "children"),
+)
+def adjust_granularity(granularity, index, current_simulation_id):
+    """There is no prevent_initial_call=True here! -> This also displays the graphs on simulation results load.
+    """
+    if current_simulation_id is not None:
+        current_simulation = simulations[current_simulation_id]
+        df_distribution = sim_utils.get_distribution(current_simulation, index, granularity)
+        fig = px.bar(df_distribution, x="group_name", y=["men", "women"], barmode='group', title='x')
+        fig.layout = page.get_layout_for_figures()
+        return granularity, fig
+    return dash.no_update
 
 
 def run_server():

@@ -1,23 +1,18 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-import plotly.express as px
 from plotly.graph_objs import Layout
-import pandas as pd
-from app.simulation import simulation
-from app.simulation import utils
 
-layout_for_figures = Layout(
-    paper_bgcolor='rgba(148, 148, 148, 255)',
-    plot_bgcolor='rgba(148, 148, 148, 255)'
-)
+from app.simulation import simulation
+from app.simulation.person import *
+from app.webapp import utils
+
 
 def get_page():
     return html.Div([
         html.Br(),
         html.Div([
-            html.H1("Dating Apps Simulation"),
-            html.Div(className="far fa-circle-check"),
-            html.P(html.I(className="far fa-circle-check", style={"font-size": "30px", "color": "red", "height": "20px", "width": "20px"}))
+            html.H1("Dating Apps Simulation "),
+            # html.P(html.I(className="bi bi-arrow-through-heart", style={"font-size": "35px", "color": "red"}))
         ], className="d-flex justify-content-center"),
         html.Hr(),
         html.Div([
@@ -29,7 +24,8 @@ def get_page():
                             html.Div("Amount of men:", className="input-fields-text")
                         ], className="col-9"),
                         html.Div([
-                            dcc.Input(id="input_amount_of_men", value=500, type="number", min=0, max=1000000,
+                            dcc.Input(id="input_amount_of_men", value=500, type="number",
+                                      min=utils.MIN_AMOUNT_OF_USERS_PER_SEX, max=utils.MAX_AMOUNT_OF_USERS_PER_SEX,
                                       className="input-fields-numbers"),
                         ], className="col-3")
                     ]),
@@ -41,7 +37,8 @@ def get_page():
                             html.Div("Amount of women:", className="input-fields-text")
                         ], className="col-9"),
                         html.Div([
-                            dcc.Input(id="input_amount_of_women", value=500, type="number", min=0, max=9999999,
+                            dcc.Input(id="input_amount_of_women", value=500, type="number",
+                                      min=utils.MIN_AMOUNT_OF_USERS_PER_SEX, max=utils.MAX_AMOUNT_OF_USERS_PER_SEX,
                                       className="input-fields-numbers"),
                         ], className="col-3")
                     ]),
@@ -55,7 +52,8 @@ def get_page():
                             html.Div("Amount of women a man will see in the simulation:", className="input-fields-text")
                         ], className="col-9"),
                         html.Div([
-                            dcc.Input(id="input_amount_of_women_a_man_will_see", value=100, type="number", min=0, max=9999999,
+                            dcc.Input(id="input_amount_of_women_a_man_will_see", value=100, type="number",
+                                      min=utils.MIN_AMOUNT_OF_OTHER_USERS_ONE_USER_WILL_SEE, max=utils.MAX_AMOUNT_OF_USERS_PER_SEX,
                                       className="input-fields-numbers"),
                         ], className="col-3")
                     ]),
@@ -67,7 +65,8 @@ def get_page():
                             html.Div("Amount of men a woman will see in the simulation:", className="input-fields-text")
                         ], className="col-9"),
                         html.Div([
-                            dcc.Input(id="input_amount_of_men_a_woman_will_see", value=100, type="number", min=0, max=9999999,
+                            dcc.Input(id="input_amount_of_men_a_woman_will_see", value=100, type="number",
+                                      min=utils.MIN_AMOUNT_OF_OTHER_USERS_ONE_USER_WILL_SEE, max=utils.MAX_AMOUNT_OF_USERS_PER_SEX,
                                       className="input-fields-numbers"),
                         ], className="col-3")
                     ]),
@@ -81,7 +80,8 @@ def get_page():
                             html.Div("Maximum amount of likes for men:", className="input-fields-text")
                         ], className="col-9"),
                         html.Div([
-                            dcc.Input(id="input_max_amount_of_likes_for_men", type="number", min=0, max=9999999, className="input-fields-numbers"),
+                            dcc.Input(id="input_max_amount_of_likes_for_men", type="number",
+                                      min=0, max=utils.MAX_AMOUNT_OF_USERS_PER_SEX, className="input-fields-numbers"),
                         ], className="col-3")
                     ]),
                 ], className="col-md-6"),
@@ -92,7 +92,8 @@ def get_page():
                             html.Div("Maximum amount of likes for women:", className="input-fields-text")
                         ], className="col-9"),
                         html.Div([
-                            dcc.Input(id="input_max_amount_of_likes_for_women", type="number", min=0, max=9999999, className="input-fields-numbers"),
+                            dcc.Input(id="input_max_amount_of_likes_for_women", type="number",
+                                      min=0, max=utils.MAX_AMOUNT_OF_USERS_PER_SEX, className="input-fields-numbers"),
                         ], className="col-3")
                     ]),
                 ], className="col-md-6")
@@ -181,56 +182,50 @@ def get_table(sim):
     return dbc.Table(table_header + table_body, bordered=True)
 
 
-def get_results_div(sim):
-    df_amount_likes_received = utils.get_distribution_amount_likes_received(sim)
-    df_amount_matches = utils.get_distribution_amount_matches(sim)
-    fig1 = px.bar(df_amount_likes_received, x="group_name", y=["men", "women"], barmode='group', title='x')
-    fig1.layout = layout_for_figures
-    fig2 = px.bar(df_amount_matches, x="group_name", y=["men", "women"], barmode='group', title='x')
-    fig2.layout = layout_for_figures
+def get_graph(index, title):
+    return html.Div([
+        html.Br(),
+        html.H6(title),
+        # customize modebar see https://plotly.com/python/configuration-options/
+        dcc.Graph(id={"type": "distribution_graph", "index": index},
+                  config={
+                      "displaylogo": False,
+                      "modeBarButtonsToRemove": ["toImage", "lasso2d", "autoScale2d"],
+                  }),
+        html.Div(style={"height": "10px"}),
+        dbc.Row([
+            html.Div([
+                "Granularity"
+            ], className="col-2"),
+            html.Div([
+                html.Div(style={"height": "7px"}),
+                dcc.Slider(min=1, max=20, value=10, step=1, marks=None, tooltip={"placement": "bottom"},
+                           id={"type": "granularity_slider", "index": index})
+            ], className="col-9"),
+            html.Div([
+                html.Div(10, id={"type": "granularity_text", "index": index})
+            ], className="col-1"),
+        ]),
+        html.Div(index, id={"type": "figure_index", "index": index}, style={"display": "none"})
+    ], className="col-lg-6")
 
+
+def get_layout_for_figures():
+    return Layout(
+        paper_bgcolor='rgba(148, 148, 148, 255)',
+        plot_bgcolor='rgba(148, 148, 148, 255)'
+    )
+
+
+def get_results_div(sim):
     return html.Div([
         html.Br(),
         html.Br(),
         html.H2("Results"),
         get_table(sim),
         dbc.Row([
-            html.Div([
-                html.Br(),
-                html.H6("Distribution of amount likes received"),
-                dcc.Graph(figure=fig1),
-                html.Div(style={"height": "10px"}),
-                dbc.Row([
-                    html.Div([
-                        "Granularity"
-                    ], className="col-2"),
-                    html.Div([
-                        html.Div(style={"height": "7px"}),
-                        dcc.Slider(id="granularity_slider_for_fig1", min=1, max=20, value=10, step=1, marks=None, tooltip={"placement": "bottom"})
-                    ], className="col-9"),
-                    html.Div([
-                        html.Div(10, id="granularity_text_for_fig1", style={"text-align": "end"})
-                    ], className="col-1"),
-                ])
-            ], className="col-lg-6"),
-            html.Div([
-                html.Br(),
-                html.H6("Distribution of amount matches"),
-                dcc.Graph(figure=fig2),
-                html.Div(style={"height": "10px"}),
-                dbc.Row([
-                    html.Div([
-                        "Granularity"
-                    ], className="col-2"),
-                    html.Div([
-                        html.Div(style={"height": "7px"}),
-                        dcc.Slider(id="granularity_slider_for_fig1", min=1, max=20, value=10, step=1, marks=None, tooltip={"placement": "bottom"})
-                    ], className="col-9"),
-                    html.Div([
-                        html.Div(10, id="granularity_text_for_fig1", style={"text-align": "end"})
-                    ], className="col-1"),
-                ])
-            ], className="col-lg-6"),
+            get_graph(DICT_KEY_AMOUNT_LIKES_RECEIVED, "Distribution of amount likes received"),
+            get_graph(DICT_KEY_AMOUNT_MATCHES, "Distribution of amount matches"),
         ]),
         html.Br(),
     ])
