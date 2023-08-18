@@ -62,9 +62,6 @@ class Simulation:
             subset_of_other_users = self.get_random_sample_of_users_by_sex(opposite_sex)
             for current_profile in subset_of_other_users:
                 like_probability = current_profile.attractivity
-                # like_probability = 14
-                # if sex == SEX_MALE:
-                #     like_probability = 46
                 if like_current_profile_random(like_probability):
                     current_user.like_profile(current_profile)
 
@@ -105,7 +102,7 @@ class Simulation:
             for i in range(self.amount_men):
                 current_x = f"({step_size} * (i+1))"
                 formula = self.formula_for_men_attractivity.replace("x", current_x)
-                attractivity = float(eval(formula))
+                attractivity = float(eval(formula)) * 100
                 self.list_of_men.append(User(SEX_MALE, attractivity, self.max_amount_of_likes_of_one_man))
                 self.progress.increase_progress()
 
@@ -113,7 +110,7 @@ class Simulation:
             for i in range(self.amount_women):
                 current_x = f"({step_size} * (i+1))"
                 formula = self.formula_for_women_attractivity.replace("x", current_x)
-                attractivity = float(eval(formula))
+                attractivity = float(eval(formula)) * 100
                 self.list_of_women.append(User(SEX_FEMALE, attractivity, self.max_amount_of_likes_of_one_woman))
                 self.progress.increase_progress()
 
