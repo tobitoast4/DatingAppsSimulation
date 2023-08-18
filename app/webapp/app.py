@@ -1,17 +1,13 @@
-import math
 from threading import Thread
-from werkzeug.exceptions import HTTPException, InternalServerError
 
 from flask import render_template
 import dash
 from dash import Dash, dcc, html, Input, Output, State, MATCH, ALL, callback, clientside_callback
 import dash_bootstrap_components as dbc
-import plotly.graph_objects as go
 import plotly.express as px
 import uuid
 
 from app.webapp import page
-from app.webapp import utils
 from app.simulation import simulation
 from app.simulation import utils as sim_utils
 from app.webapp import utils as web_utils

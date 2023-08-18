@@ -1,0 +1,6 @@
+plotly
+Flask
+pandas
+dash
+dash-bootstrap-components
+plotly-express
