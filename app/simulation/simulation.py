@@ -2,6 +2,7 @@ import sys
 import random
 import time
 import datetime
+import math  # do not remove (this is used for eval() )
 from simulation.person import *
 
 
