@@ -21,6 +21,11 @@
     height: 0;
 }
 
+.sex-icon {
+    font-size: 24px;
+    margin: 3px 0 0 10px
+}
+
 .formula-info-icon {
     font-size: 22px;
     color: white;

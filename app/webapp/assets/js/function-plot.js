@@ -23,9 +23,9 @@ function draw(canvas_id, func, sex) {
     showAxes(ctx, axes);
     let fun = eval("(function func(x) { return " + func + "; })");
     if (sex == 1){
-        funGraph(ctx, axes, fun, "rgb(66,44,255)", 2);
+        funGraph(ctx, axes, fun, "rgb(111, 168, 220)", 2);
     } else {
-        funGraph(ctx, axes, fun, "rgb(255,44,44)", 2);
+        funGraph(ctx, axes, fun, "rgb(230, 110, 180)", 2);
     }
 }
 

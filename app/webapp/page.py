@@ -15,13 +15,27 @@ def get_page():
             # html.P(html.I(className="bi bi-arrow-through-heart", style={"font-size": "35px", "color": "red"}))
         ], className="d-flex justify-content-center"),
         html.Hr(),
+        html.P([
+            "The idea to this website is based on the video of ",
+            html.I("Memeable Data"),
+            ": ",
+            html.A("Why Men Get So Few Matches on Dating Apps", target="_blank",
+                   href="https://www.youtube.com/watch?v=x3lypVnJ0HM"),
+            ". ",
+            """I highly recommend to watch his video first in order to better understand the inputs and moreover 
+            the results. The conclusion might seem frustrating for men, but it might help to not view dating apps to 
+            serious. Meet people in real life! And now have fun with the simulation!""",
+        ]),
         html.Div([
             dbc.Row([
                 html.Div([
                     html.Div(className="row-separator-top"),
                     dbc.Row([
                         html.Div([
-                            html.Div("Amount of men:", className="input-fields-text")
+                            html.Div([
+                                html.Div("Amount of men", className="input-fields-text"),
+                                html.I(className="fas fa-mars sex-icon", style={"color": "#6fa8dc"}),
+                            ], className="d-flex justify-content-start"),
                         ], className="col-9"),
                         html.Div([
                             dcc.Input(id="input_amount_of_men", value=500, type="number",
@@ -34,7 +48,10 @@ def get_page():
                     html.Div(className="row-separator-top"),
                     dbc.Row([
                         html.Div([
-                            html.Div("Amount of women:", className="input-fields-text")
+                            html.Div([
+                                html.Div("Amount of women", className="input-fields-text"),
+                                html.I(className="fas fa-venus sex-icon", style={"color": "#e66eb4"}),
+                            ], className="d-flex justify-content-start"),
                         ], className="col-9"),
                         html.Div([
                             dcc.Input(id="input_amount_of_women", value=500, type="number",
@@ -49,7 +66,7 @@ def get_page():
                     html.Div(className="row-separator-top"),
                     dbc.Row([
                         html.Div([
-                            html.Div("Amount of women a man will see in the simulation:", className="input-fields-text")
+                            html.Div("Amount of women a man will see in the simulation", className="input-fields-text")
                         ], className="col-9"),
                         html.Div([
                             dcc.Input(id="input_amount_of_women_a_man_will_see", value=100, type="number",
@@ -62,7 +79,7 @@ def get_page():
                     html.Div(className="row-separator-top"),
                     dbc.Row([
                         html.Div([
-                            html.Div("Amount of men a woman will see in the simulation:", className="input-fields-text")
+                            html.Div("Amount of men a woman will see in the simulation", className="input-fields-text")
                         ], className="col-9"),
                         html.Div([
                             dcc.Input(id="input_amount_of_men_a_woman_will_see", value=100, type="number",
@@ -77,7 +94,8 @@ def get_page():
                     html.Div(className="row-separator-top"),
                     dbc.Row([
                         html.Div([
-                            html.Div("Maximum amount of likes for men:", className="input-fields-text")
+                            html.Div("Maximum amount of likes for men", className="input-fields-text"),
+                            html.I("Leave empty for infinite.", style={"font-size": "12px"})
                         ], className="col-9"),
                         html.Div([
                             dcc.Input(id="input_max_amount_of_likes_for_men", type="number", className="input-fields-numbers"),
@@ -88,7 +106,8 @@ def get_page():
                     html.Div(className="row-separator-top"),
                     dbc.Row([
                         html.Div([
-                            html.Div("Maximum amount of likes for women:", className="input-fields-text")
+                            html.Div("Maximum amount of likes for women", className="input-fields-text"),
+                            html.I("Leave empty for infinite.", style={"font-size": "12px"})
                         ], className="col-9"),
                         html.Div([
                             dcc.Input(id="input_max_amount_of_likes_for_women", type="number", className="input-fields-numbers"),
@@ -101,7 +120,7 @@ def get_page():
                     html.Div(className="row-separator-top"),
                     dbc.Row([
                         html.Div([
-                            html.Div("Formula to determine attractivity for men:", className="input-fields-text"),
+                            html.Div("Formula to determine attractivity for men", className="input-fields-text"),
                             html.I(className="bi bi-info-circle-fill formula-info-icon")
                         ], className="d-flex justify-content-start"),
                     ]),
@@ -110,7 +129,7 @@ def get_page():
                     html.Div(className="row-separator-top"),
                     dbc.Row([
                         html.Div([
-                            html.Div("Formula to determine attractivity for women:", className="input-fields-text"),
+                            html.Div("Formula to determine attractivity for women", className="input-fields-text"),
                             html.I(className="bi bi-info-circle-fill formula-info-icon")
                         ], className="d-flex justify-content-start"),
                     ]),

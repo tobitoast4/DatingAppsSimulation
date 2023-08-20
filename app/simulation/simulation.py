@@ -1,6 +1,7 @@
 import sys
 import random
 import time
+import datetime
 from simulation.person import *
 
 
@@ -37,6 +38,9 @@ class Simulation:
         self.progress = Progress((self.amount_men + self.amount_women) * 3)
         self.list_of_men = []
         self.list_of_women = []
+
+        self.timestamp_started = datetime.datetime.now()
+        self.timestamp_finished = None
         self.latest_error = None
 
     def get_random_sample_of_users_by_sex(self, sex):
@@ -124,6 +128,7 @@ class Simulation:
                 user.calculate_amount_of_matches()
                 self.progress.increase_progress()
             self.progress.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_5
+            self.timestamp_finished = datetime.datetime.now()
         except SyntaxError:
             self.latest_error = f"{sys.exc_info()[1].args[0]} in <br><br>" \
                                 f"{sys.exc_info()[1].args[1][3]} <br><br> " \
