@@ -205,7 +205,9 @@ def adjust_granularity(granularity, index, current_simulation_id):
         except KeyError:
             return dash.no_update  # TODO: show error that simulation is gone
         df_distribution = sim_utils.get_distribution(current_simulation, index, granularity)
-        fig = px.bar(df_distribution, x="group_name", y=["men", "women"], barmode='group', title='x')
+        group_color = {"men": "#6fa8dc", "women": "#e66eb4"}
+        fig = px.bar(df_distribution, x="group_name", y=["men", "women"], barmode='group', title='x',
+                     color_discrete_map=group_color)
         fig.layout = page.get_layout_for_figures()
         return granularity, fig
     return dash.no_update
