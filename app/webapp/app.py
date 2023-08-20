@@ -1,3 +1,4 @@
+import time
 from threading import Thread
 
 from flask import render_template
@@ -179,13 +180,13 @@ def update_progress(n, current_simulation_id):
     State("current_simulation_id_results", "children"),
 )
 def show_results(simulation_progress_status_text, current_simulation_id, current_simulation_id_results):
-    if simulation_progress_status_text == simulation.PROGRESS_STATE_TEXT_STATUS_5 and current_simulation_id != current_simulation_id_results:
-        if current_simulation_id is not None:
-            try:
-                sim = simulations[current_simulation_id]
+    if current_simulation_id is not None and current_simulation_id != current_simulation_id_results:
+        try:
+            sim = simulations[current_simulation_id]
+            if sim.timestamp_finished is not None:
                 return page.get_results_div(sim), current_simulation_id
-            except KeyError:
-                pass  # TODO: show error that simulation is gone
+        except KeyError:
+            pass  # TODO: show error that simulation is gone
     return dash.no_update
 
 
