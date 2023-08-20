@@ -41,7 +41,7 @@ app.layout = html.Div(children=[
 
 @server.route('/plotting')
 def plotting():
-    return render_template("html/function_plot.html")
+    return render_template("function_plot.html")  # this has to be under ./templates/
 
 
 clientside_callback(
