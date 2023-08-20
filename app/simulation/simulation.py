@@ -1,7 +1,7 @@
 import sys
 import random
 import time
-from app.simulation.person import *
+from simulation.person import *
 
 
 def like_current_profile_random(probability_rate):

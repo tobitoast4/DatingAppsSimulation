@@ -2,9 +2,9 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 from plotly.graph_objs import Layout
 
-from app.simulation import simulation
-from app.simulation.person import *
-from app.webapp import utils
+from simulation import simulation
+from simulation.person import *
+from webapp import utils
 
 
 def get_page():

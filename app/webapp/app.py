@@ -7,24 +7,29 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 import uuid
 
-from app.webapp import page
-from app.simulation import simulation
-from app.simulation import utils as sim_utils
-from app.webapp import utils as web_utils
+from webapp import page
+from simulation import simulation
+from simulation import utils as sim_utils
+from webapp import utils as web_utils
 
 simulations = {}
 
 
 # Use dbc.icons.BOOTSTRAP or dbc.icons.FONT_AWESOME for icons (see https://stackoverflow.com/a/76015777/14522363)
-app = Dash(__name__, external_stylesheets=[dbc.icons.BOOTSTRAP, dbc.icons.FONT_AWESOME, dbc.themes.SLATE])
+app = Dash(__name__, update_title=None, external_stylesheets=[
+    dbc.icons.BOOTSTRAP, dbc.icons.FONT_AWESOME, dbc.themes.SLATE
+])
+server = app.server
 app.title = "Dating Apps Simulation"
 app._favicon = "favicon.svg"
 app.layout = html.Div(children=[
+    html.Meta(name="viewport", content="width=device-width, initial-scale=1"),
+    html.Meta(name="color-scheme", content="light only"),
     html.Div([
         page.get_page(),
         html.Div(id="empty-div-1"),
         html.Div(id="empty-div-2"),
-        html.Div(id="current_simulation_id", children=None, style={"display": "block"}),
+        html.Div(id="current_simulation_id", children=None, style={"display": "none"}),
         html.Div(id="current_simulation_id_results", children=None, style={"display": "none"}),
         dcc.Interval(id="progress_interval", n_intervals=0, interval=500),
     ], className="main-page-padding", id="page"),
@@ -34,7 +39,7 @@ app.layout = html.Div(children=[
 ])
 
 
-@app.server.route('/plotting')
+@server.route('/plotting')
 def plotting():
     return render_template("html/function_plot.html")
 
@@ -187,7 +192,3 @@ def adjust_granularity(granularity, index, current_simulation_id):
         fig.layout = page.get_layout_for_figures()
         return granularity, fig
     return dash.no_update
-
-
-def run_server():
-    app.run_server(port=8040, debug=False, threaded=True)
