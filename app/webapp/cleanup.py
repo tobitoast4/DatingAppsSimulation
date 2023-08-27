@@ -10,7 +10,7 @@ def start_clean_up_task(simulations):
 
 def clean_up(simulations: dict):
     """Removes all simulations from the given input dictionary that are either
-    started 10 days ago or finished 10 days ago.
+    started 3 days ago or finished 3 days ago.
     """
     while True:
         current_timestamp = datetime.now()
@@ -18,10 +18,10 @@ def clean_up(simulations: dict):
         for sim_uuid in simulations:
             sim = simulations[sim_uuid]
             if sim.timestamp_finished is None:
-                if sim.timestamp_started + timedelta(seconds=10) < current_timestamp:
+                if sim.timestamp_started + timedelta(days=3) < current_timestamp:
                     simulations_to_remove.append(sim_uuid)
             else:
-                if sim.timestamp_finished + timedelta(seconds=10) < current_timestamp:
+                if sim.timestamp_finished + timedelta(days=3) < current_timestamp:
                     simulations_to_remove.append(sim_uuid)
         for sim_uuid in simulations_to_remove:
             simulations.pop(sim_uuid)
