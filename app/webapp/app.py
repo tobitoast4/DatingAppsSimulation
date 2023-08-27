@@ -30,7 +30,6 @@ class DashApp(Dash):
                 html.Div(id="empty-div-1"),
                 html.Div(id="empty-div-2"),
                 html.Div(id="current_simulation_id", children=None, style={"display": "none"}),
-                html.Div(id="current_simulation_id_results", children=None, style={"display": "none"}),
                 html.Div(id="progress_interval_container")
             ], className="main-page-padding", id="page"),
             html.Div(id="notify-holder", className="notify-container"),
@@ -165,7 +164,7 @@ def update_progress(n, current_simulation_id):
             return 0, "", "", "", "Run Simulation", ["Error in simulation", current_simulation.latest_error], True
         progress = current_simulation.progress.current_progress_in_percent()
         progress_text = current_simulation.progress.current_progress_status_text
-        if progress >= 100:
+        if current_simulation.timestamp_finished is not None:
             return progress, f"{progress} %" if progress >= 5 else "", progress_text, "hidden", "Rerun Simulation", "", True
         # only add text after 5% progress to ensure text isn't squashed too much
         return progress, f"{progress} %" if progress >= 5 else "", progress_text, "", "Rerun Simulation", "", False
@@ -174,19 +173,16 @@ def update_progress(n, current_simulation_id):
 
 @callback(
     Output("simulation_results", "children"),
-    Output("current_simulation_id_results", "children"),
-    Input("simulation_progress_status_text", "children"),
+    Input("progress_interval", "n_intervals"),
     State("current_simulation_id", "children"),
-    State("current_simulation_id_results", "children"),
 )
-def show_results(simulation_progress_status_text, current_simulation_id, current_simulation_id_results):
-    if current_simulation_id is not None and current_simulation_id != current_simulation_id_results:
-        try:
-            sim = simulations[current_simulation_id]
-            if sim.timestamp_finished is not None:
-                return page.get_results_div(sim), current_simulation_id
-        except KeyError:
-            pass  # TODO: show error that simulation is gone
+def show_results(n, current_simulation_id):
+    try:
+        sim = simulations[current_simulation_id]
+        if sim.timestamp_finished is not None:
+            return page.get_results_div(sim)
+    except KeyError:
+        pass  # TODO: show error that simulation is gone
     return dash.no_update
 
 
