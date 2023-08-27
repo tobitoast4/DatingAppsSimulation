@@ -129,16 +129,16 @@ class Simulation:
             for i in range(self.amount_men):
                 current_x = f"({step_size} * (i+1))"
                 formula = self.formula_for_men_attractivity.replace("x", current_x)
-                attractivity = float(eval(formula)) * 100
-                self.list_of_men.append(User(SEX_MALE, attractivity, self.max_amount_of_likes_of_one_man))
+                attractiveness = float(eval(formula)) * 100
+                self.list_of_men.append(User(SEX_MALE, attractiveness, self.max_amount_of_likes_of_one_man))
                 self.progress.increase_progress()
 
             step_size = 1/self.amount_women
             for i in range(self.amount_women):
                 current_x = f"({step_size} * (i+1))"
                 formula = self.formula_for_women_attractivity.replace("x", current_x)
-                attractivity = float(eval(formula)) * 100
-                self.list_of_women.append(User(SEX_FEMALE, attractivity, self.max_amount_of_likes_of_one_woman))
+                attractiveness = float(eval(formula)) * 100
+                self.list_of_women.append(User(SEX_FEMALE, attractiveness, self.max_amount_of_likes_of_one_woman))
                 self.progress.increase_progress()
 
             self.progress.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_2
@@ -181,7 +181,7 @@ class Progress:
         """
         self.progress_to_reach = progress_to_reach
         self.current_progress = 0
-        self.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_0
+        self.current_progress_status_text = PROGRESS_STATE_TEXT_STATUS_0  # the initial text
 
     def increase_progress(self):
         self.current_progress += 1

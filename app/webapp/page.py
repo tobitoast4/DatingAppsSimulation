@@ -120,7 +120,7 @@ def get_page():
                     html.Div(className="row-separator-top"),
                     dbc.Row([
                         html.Div([
-                            html.Div("Formula to determine attractivity for men", className="input-fields-text"),
+                            html.Div("Formula to determine attractiveness for men", className="input-fields-text"),
                             html.I(className="bi bi-info-circle-fill formula-info-icon")
                         ], className="d-flex justify-content-start"),
                     ]),
@@ -129,7 +129,7 @@ def get_page():
                     html.Div(className="row-separator-top"),
                     dbc.Row([
                         html.Div([
-                            html.Div("Formula to determine attractivity for women", className="input-fields-text"),
+                            html.Div("Formula to determine attractiveness for women", className="input-fields-text"),
                             html.I(className="bi bi-info-circle-fill formula-info-icon")
                         ], className="d-flex justify-content-start"),
                     ]),
