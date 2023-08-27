@@ -22,9 +22,13 @@ def get_page():
             html.A("Why Men Get So Few Matches on Dating Apps", target="_blank",
                    href="https://www.youtube.com/watch?v=x3lypVnJ0HM"),
             ". ",
-            """I highly recommend to watch his video first in order to better understand the inputs and moreover 
+            """I highly recommend watching his video first in order to better understand the inputs and moreover 
             the results. The conclusion might seem frustrating for men, but it might help to not view dating apps to 
             serious. Meet people in real life! And now have fun with the simulation!""",
+            html.Br(),
+            "See code on ",
+            html.A("GitHub", target="_blank", href="https://github.com/tobitoast4/DatingAppsSimulation"),
+            "."
         ]),
         html.Div([
             dbc.Row([
