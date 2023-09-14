@@ -1,4 +1,6 @@
-from webapp.app import server
+from webapp.app import app
 
-if __name__ == "__main__":
-    server.run("127.0.0.1", port=80, debug=False, threaded=True, processes=1)
+# if __name__ == "__main__":
+#     server.run("127.0.0.1", port=80, debug=False, threaded=True, processes=1)
+
+app.run(debug=True)

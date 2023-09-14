@@ -111,6 +111,19 @@ class Simulation:
         median_user = users_sorted[len(users_sorted) // 2]
         return median_user.amount_matches
 
+    def get_users_by_ids(self, user_ids):
+        """Gets all users by id.
+
+        Args:
+            user_ids: A set of user ids. All users with their id within this set will be returned.
+        """
+        filtered_users = []
+        users = [user.to_dict() for user in self.list_of_men + self.list_of_women]
+        for user in users:
+            if user[DICT_KEY_OBJECT_ID] in user_ids:
+                filtered_users.append(user)
+        return filtered_users
+
     def run_sim(self, time_sleep):
         """Runs the simulation. That includes creating all male and female users with their attractiveness level,
            swiping the profiles and calculating the matches. In between the status of the progress of the simulation

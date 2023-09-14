@@ -11,6 +11,7 @@ import uuid
 from webapp import page
 from simulation import simulation
 from simulation import utils as sim_utils
+from simulation.person import DICT_KEY_AMOUNT_LIKES_RECEIVED, DICT_KEY_AMOUNT_MATCHES
 from webapp import utils as web_utils
 from webapp import cleanup
 
@@ -189,6 +190,7 @@ def show_results(n, current_simulation_id):
 @callback(
     Output({"type": "granularity_text", "index": MATCH}, "children"),
     Output({"type": "distribution_graph", "index": MATCH}, "figure"),
+    Output({"type": "dataframe_store", "index": MATCH}, "data"),
     Input({"type": "granularity_slider", "index": MATCH}, "value"),
     State({"type": "figure_index", "index": MATCH}, "children"),
     State("current_simulation_id", "children"),
@@ -206,5 +208,36 @@ def adjust_granularity(granularity, index, current_simulation_id):
         fig = px.bar(df_distribution, x="group_name", y=["men", "women"], barmode='group', title='x',
                      color_discrete_map=group_color)
         fig.layout = page.get_layout_for_figures()
-        return granularity, fig
+        return granularity, fig, df_distribution.to_dict("records")
+    return dash.no_update
+
+
+@callback(
+    Output('table_of_users', 'rowData'),
+    Output('table_of_users_amount_rows', 'children'),
+    Input({"type": "distribution_graph", "index": ALL}, 'selectedData'),
+    State({"type": "dataframe_store", "index": ALL}, "data"),
+    State("current_simulation_id", "children"),
+)
+def filter_table_data(selected_data_sets, data_sets, current_simulation_id):
+    if current_simulation_id is not None:
+        try:
+            current_simulation = simulations[current_simulation_id]
+        except KeyError:
+            return dash.no_update  # TODO: show error that simulation is gone
+        user_ids = set()
+        for i in range(len(selected_data_sets)):
+            selected_data_set = selected_data_sets[i]
+            data_set = data_sets[i]
+            if selected_data_set is not None:
+                for point in selected_data_set["points"]:
+                    if point["curveNumber"] == 0:
+                        selected_group_sex = "user_ids_of_men"
+                    else:  # point["curveNumber"] == 1
+                        selected_group_sex = "user_ids_of_women"
+                    selected_group = point["x"]  # this value is for example '90 - 100'
+                    for group in data_set:  # iterating the different groups e.g. 0 - 10, 10 - 20, ... 90 - 100 for granularity 10
+                        if group["group_name"] == selected_group:
+                            user_ids.update(group[selected_group_sex])
+        return current_simulation.get_users_by_ids(user_ids), f"Amount of rows: {len(user_ids)}"
     return dash.no_update

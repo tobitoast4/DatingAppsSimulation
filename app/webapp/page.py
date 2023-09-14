@@ -1,4 +1,5 @@
 from dash import html, dcc
+import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 from plotly.graph_objs import Layout
 
@@ -234,7 +235,8 @@ def get_graph(index, title, highest_granularity):
                 html.Div(10, id={"type": "granularity_text", "index": index})
             ], className="col-1"),
         ]),
-        html.Div(index, id={"type": "figure_index", "index": index}, style={"display": "none"})
+        html.Div(index, id={"type": "figure_index", "index": index}, style={"display": "none"}),
+        dcc.Store(id={"type": "dataframe_store", "index": index}, storage_type='memory'),
     ], className="col-lg-6")
 
 
@@ -247,6 +249,7 @@ def get_layout_for_figures():
 
 def get_results_div(sim):
     highest_granularity = min(sim.amount_men, sim.amount_women)
+    users = [user.to_dict() for user in sim.list_of_men + sim.list_of_women]
     return html.Div([
         html.Br(),
         html.Br(),
@@ -256,5 +259,27 @@ def get_results_div(sim):
             get_graph(DICT_KEY_AMOUNT_LIKES_RECEIVED, "Distribution of amount likes received", highest_granularity),
             get_graph(DICT_KEY_AMOUNT_MATCHES, "Distribution of amount matches", highest_granularity),
         ]),
+        html.Br(),
+
+        dag.AgGrid(
+            id="table_of_users",
+            rowData=users,
+            defaultColDef={"resizable": True, "sortable": True, "filter": True},
+            columnDefs=[{"field": i, "id": i} for i in [DICT_KEY_OBJECT_ID, DICT_KEY_SEX, DICT_KEY_ATTRACTIVENESS,
+                                DICT_KEY_AMOUNT_LIKES_GIVEN, DICT_KEY_AMOUNT_LIKES_RECEIVED, DICT_KEY_AMOUNT_MATCHES]],
+            className="ag-theme-balham-dark",
+            dashGridOptions={
+                "overlayNoRowsTemplate": """<span>
+                                                No data selected.<br/>
+                                                Select data in the graphs with the 'Box Select' to show data here.<br/>
+                                                <br/>Tip: hold 'Shift' to use multiple boxes.
+                                            </span>"""
+            },
+            dangerously_allow_code=True,
+            columnSize="sizeToFit",
+            style={"height": "600px"}
+        ),
+        html.Div(id="table_of_users_amount_rows"),
+        html.Br(),
         html.Br(),
     ])

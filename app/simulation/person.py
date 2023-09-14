@@ -3,6 +3,7 @@ SEX_FEMALE = 2
 
 DICT_KEY_OBJECT_ID = "object_id"
 DICT_KEY_SEX = "sex"
+DICT_KEY_ATTRACTIVENESS = "attractiveness"
 DICT_KEY_AMOUNT_LIKES_GIVEN = "amount_likes_given"
 DICT_KEY_AMOUNT_LIKES_RECEIVED = "amount_likes_received"
 DICT_KEY_AMOUNT_MATCHES = "amount_matches"
@@ -58,6 +59,7 @@ class User:
         return {
             DICT_KEY_OBJECT_ID: id(self),
             DICT_KEY_SEX: self.sex,
+            DICT_KEY_ATTRACTIVENESS: round(self.attractiveness, 4),
             DICT_KEY_AMOUNT_LIKES_GIVEN: len(self.likes_given),
             DICT_KEY_AMOUNT_LIKES_RECEIVED: len(self.likes_received),
             DICT_KEY_AMOUNT_MATCHES: self.amount_matches
